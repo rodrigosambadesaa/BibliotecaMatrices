@@ -1,0 +1,6 @@
+target/
+principal-output.txt
+*.log
+.idea/
+.vscode/
+*.iml
