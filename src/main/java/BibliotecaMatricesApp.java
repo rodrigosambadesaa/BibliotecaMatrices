@@ -51,6 +51,7 @@ public final class BibliotecaMatricesApp {
         probarConstructoresArray();
         probarConstructoresLista();
         probarPropiedadesAlgebraicas();
+        probarMatrices3D();
         probarFactorizaciones();
         probarMatricesBooleanasYModulares();
         auditarApi(array.Matriz.class);
@@ -119,6 +120,21 @@ public final class BibliotecaMatricesApp {
         comprobar(a.resolverJacobi(array.Matriz.columna(BigComplex.ONE, BigComplex.ONE), TOL, 200).convergio(),
                 "Jacobi");
         System.out.println("LU, QR, Cholesky e iteración: CORRECTO");
+    }
+
+    private static void probarMatrices3D() {
+        seccion("Matrices 3D");
+        array.Matriz3D a = new array.Matriz3D(new double[][][]{
+                {{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}
+        });
+        array.Matriz3D identidad = array.Matriz3D.identidadPorCapas(2, 2, 2);
+        comprobar(a.productoPorCapas(identidad).equals(a), "Producto identidad por capas");
+        comprobar(a.equals(a.comoMatriz3DLista()), "Equivalencia 3D array/lista");
+        comprobar(a.permutarEjes(1, 0, 2).permutarEjes(1, 0, 2).equals(a), "Permutación de ejes");
+        comprobar(a.reshape(1, 4, 2).reshape(2, 2, 2).equals(a), "reshape 3D");
+        comprobar(Complejos.aproximadamenteIguales(a.capa(0).determinante(), Complejos.de(-2), TOL,
+                a.mathContext()), "API 2D sobre una capa");
+        System.out.println("array.Matriz3D/lista.Matriz3D: cortes, ejes, reshape y producto por capas CORRECTO");
     }
 
     private static void probarMatricesBooleanasYModulares() {

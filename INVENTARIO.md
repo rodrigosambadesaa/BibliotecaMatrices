@@ -5,6 +5,10 @@
 - [x] Núcleo común inmutable, precisión y excepciones.
 - [x] Implementación `array.Matriz` con `BigComplex[][]`.
 - [x] Implementación `lista.Matriz` independiente con `ArrayList<ArrayList<BigComplex>>`.
+- [x] Núcleo 3D común con ejes capa-fila-columna y cortes bidimensionales.
+- [x] Implementación `array.Matriz3D` con `BigComplex[][][]`.
+- [x] Implementación `lista.Matriz3D` independiente con tres niveles de `ArrayList`.
+- [x] Aritmética, reducciones, normas, ejes, concatenación, reshape y producto 3D por capas.
 - [x] Acceso, edición funcional y aritmética.
 - [x] Predicados y matrices especiales.
 - [x] Gauss, determinantes, inversas, rango y espacios.

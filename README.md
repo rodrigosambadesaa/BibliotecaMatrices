@@ -6,6 +6,8 @@ representaciones independientes:
 
 - `array.Matriz` almacena realmente `BigComplex[][]`.
 - `lista.Matriz` almacena realmente `ArrayList<ArrayList<BigComplex>>`.
+- `array.Matriz3D` almacena realmente `BigComplex[][][]`.
+- `lista.Matriz3D` almacena realmente tres niveles de `ArrayList`.
 
 `lista.Matriz` no construye, llama ni delega en `array.Matriz`. Los algoritmos
 compartidos de `comun.AbstractMatriz` solo usan la interfaz de acceso
@@ -26,8 +28,10 @@ docker run --rm biblioteca-matrices
 ```
 
 La prueba `CoberturaApiTest` ejecuta `BibliotecaMatricesApp`, descubre por reflexión
-los constructores y métodos públicos, los invoca individualmente y falla ante
-cualquier método no probado, retorno nulo o excepción inesperada. El principal
+los constructores y métodos públicos de las matrices 2D, los invoca
+individualmente y falla ante cualquier método no probado, retorno nulo o
+excepción inesperada. `Matriz3DTest` verifica las dos representaciones 3D, sus
+operaciones y sus contratos de inmutabilidad y dimensiones. El principal
 imprime entradas, resultados, `CORRECTO` y un resumen de cobertura.
 
 ## Dependencias
@@ -44,12 +48,18 @@ decimal de `Double.toString()`.
 ```text
 src/main/java/
 ├── BibliotecaMatricesApp.java
-├── array/Matriz.java
-├── lista/Matriz.java
+├── array/
+│   ├── Matriz.java
+│   └── Matriz3D.java
+├── lista/
+│   ├── Matriz.java
+│   └── Matriz3D.java
 ├── comun/
 │   ├── AbstractMatriz.java
+│   ├── AbstractMatriz3D.java
 │   ├── Complejos.java
 │   ├── MatrizCompleja.java
+│   ├── Matriz3DCompleja.java
 │   ├── excepciones/
 │   └── resultados/
 └── otros/
@@ -74,6 +84,49 @@ interna queda expuesta. `BigComplex` es inmutable.
 
 La igualdad `equals` es exacta según la igualdad matemática de `BigComplex`;
 `igualExacta` la hace explícita y `aproximadamenteIgual` recibe tolerancia.
+
+## Matrices 3D
+
+Las matrices 3D usan la convención estable `capa × fila × columna` y los
+índices comienzan en cero. `array.Matriz3D` y `lista.Matriz3D` comparten la API
+genérica de `AbstractMatriz3D`, pero conservan almacenamientos completamente
+independientes y devuelven siempre el tipo concreto del receptor.
+
+```java
+array.Matriz3D volumen = new array.Matriz3D(new double[][][]{
+    {{1, 2}, {3, 4}},
+    {{5, 6}, {7, 8}}
+});
+
+array.Matriz primera = volumen.capa(0);       // corte filas × columnas
+array.Matriz porFila = volumen.cortePorFila(0); // corte capas × columnas
+array.Matriz3D doble = volumen.suma(volumen);
+array.Matriz3D transpuesta = volumen.traspuestaPorCapas();
+array.Matriz3D reordenada = volumen.permutarEjes(1, 0, 2);
+```
+
+La API 3D incluye:
+
+- Construcción desde `double`, `Double`, `BigDecimal`, `String` y
+  `BigComplex`, configuración de precisión, ceros, relleno, identidades por
+  capas, aleatorias y apilado de matrices 2D.
+- Acceso inmutable, sustitución y extracción de capas, cortes sobre cualquiera
+  de los tres ejes, submatrices 3D, inserción, eliminación, redimensión y
+  concatenación por capas, filas o columnas.
+- Suma, resta, conjugación, escalares, Hadamard, cociente y producto matricial
+  independiente por capas.
+- Transpuesta y adjunta hermítica por capas, permutación de ejes, `flatten`,
+  `reshape`, suma y promedio globales o por capas, producto interno y normas de
+  Frobenius y máximo.
+- Conversión sin aliasing entre las representaciones array/lista y comparación
+  exacta o aproximada.
+- Adaptadores `aplicarPorCapas` y `combinarPorCapas` para reutilizar sobre
+  todas las capas cualquier algoritmo 2D cuyo resultado sea otra matriz.
+
+Las operaciones algebraicas estrictamente bidimensionales —determinantes,
+inversas, factorizaciones, espectro, sistemas, estadística o grafos— se aplican
+a un corte devuelto por `capa`, `cortePorFila` o `cortePorColumna`. No se asigna
+un determinante o una inversa ficticios a un tensor de orden tres.
 
 ## Catálogo de API
 
@@ -159,7 +212,9 @@ aleatorias normales, dispersas, hermíticas, unitarias y definidas positivas.
 | Operación | Tiempo | Memoria adicional |
 |---|---:|---:|
 | suma / Hadamard | `O(mn)` | `O(mn)` |
+| suma / Hadamard 3D | `O(kmn)` | `O(kmn)` |
 | producto | `O(mnp)` | `O(mp)` |
+| producto 3D por capas | `O(kmnp)` | `O(kmp)` |
 | Gauss, LU, inversa | `O(n³)` | `O(n²)` |
 | QR | `O(mn²)` | `O(mn)` |
 | Cholesky | `O(n³)` | `O(n²)` |

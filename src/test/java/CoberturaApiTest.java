@@ -24,5 +24,6 @@ class CoberturaApiTest {
         assertTrue(texto.contains("fallidos=0, no probados=0"), texto);
         assertTrue(texto.contains("array.Matriz#suma"), "No se auditó la API array");
         assertTrue(texto.contains("lista.Matriz#suma"), "No se auditó la API lista");
+        assertTrue(texto.contains("array.Matriz3D/lista.Matriz3D"), "No se demostró la API 3D");
     }
 }
