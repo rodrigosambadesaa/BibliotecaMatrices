@@ -132,9 +132,13 @@ public final class BibliotecaMatricesApp {
         comprobar(a.equals(a.comoMatriz3DLista()), "Equivalencia 3D array/lista");
         comprobar(a.permutarEjes(1, 0, 2).permutarEjes(1, 0, 2).equals(a), "Permutación de ejes");
         comprobar(a.reshape(1, 4, 2).reshape(2, 2, 2).equals(a), "reshape 3D");
+        comprobar(a.desplegar(0).filas() == 2 && a.desplegar(0).columnas() == 4, "Unfolding modo 0");
+        comprobar(a.sumaEje(0).equals(a.sumaPorCapas()), "Reducción por eje");
+        comprobar(array.Matriz3D.identidadT(2, 2).esIdentidadT(), "Identidad t-product");
+        comprobar(a.productoT(array.Matriz3D.identidadT(2, 2)).aproximadamenteIgual(a, TOL), "t-product");
         comprobar(Complejos.aproximadamenteIguales(a.capa(0).determinante(), Complejos.de(-2), TOL,
                 a.mathContext()), "API 2D sobre una capa");
-        System.out.println("array.Matriz3D/lista.Matriz3D: cortes, ejes, reshape y producto por capas CORRECTO");
+        System.out.println("array.Matriz3D/lista.Matriz3D: ejes, contracciones, convolución, HOSVD y t-product CORRECTO");
     }
 
     private static void probarMatricesBooleanasYModulares() {
@@ -364,10 +368,13 @@ public final class BibliotecaMatricesApp {
     private static void auditarResultados() {
         seccion("Clases públicas de resultado");
         array.Matriz a = new array.Matriz(new double[][]{{4, 1}, {1, 3}});
+        array.Matriz3D tensor = array.Matriz3D.diagonal(Complejos.de(2), Complejos.de(3));
+        array.Matriz3D tubo = new array.Matriz3D(new double[][][]{{{1}}, {{2}}});
         List<Object> resultados = List.of(
                 a.formaEscalonadaConDetalles(), a.descomposicionLUP(),
                 a.descomposicionQRGramSchmidtModificado(),
-                a.metodoDeLaPotencia(TOL, 20), a.discutirSistema(array.Matriz.columna(BigComplex.ONE, BigComplex.ONE)));
+                a.metodoDeLaPotencia(TOL, 20), a.discutirSistema(array.Matriz.columna(BigComplex.ONE, BigComplex.ONE)),
+                tensor.descomposicionHOSVD(), tubo.descomposicionTSVD());
         for (Object resultado : resultados) {
             for (Method m : resultado.getClass().getMethods()) {
                 if (m.getParameterCount() == 0 && m.getDeclaringClass().getPackageName().equals("comun.resultados")) {

@@ -8,7 +8,12 @@
 - [x] Núcleo 3D común con ejes capa-fila-columna y cortes bidimensionales.
 - [x] Implementación `array.Matriz3D` con `BigComplex[][][]`.
 - [x] Implementación `lista.Matriz3D` independiente con tres niveles de `ArrayList`.
-- [x] Aritmética, reducciones, normas, ejes, concatenación, reshape y producto 3D por capas.
+- [x] Fibras, planos, broadcasting, partición, padding y transformaciones sobre los tres ejes.
+- [x] Aritmética, reducciones, estadística, normas, concatenación y reshape 3D.
+- [x] Unfolding, producto modo-n, contracciones, productos exterior, Kronecker y vectorial.
+- [x] HOSVD/Tucker truncada y resultados inmutables con error verificable.
+- [x] Convolución y correlación 3D completa, misma y válida.
+- [x] Álgebra t-product: identidad, adjunta, inversa, potencia, DFT y t-SVD.
 - [x] Acceso, edición funcional y aritmética.
 - [x] Predicados y matrices especiales.
 - [x] Gauss, determinantes, inversas, rango y espacios.

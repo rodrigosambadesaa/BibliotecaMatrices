@@ -30,8 +30,8 @@ docker run --rm biblioteca-matrices
 La prueba `CoberturaApiTest` ejecuta `BibliotecaMatricesApp`, descubre por reflexión
 los constructores y métodos públicos de las matrices 2D, los invoca
 individualmente y falla ante cualquier método no probado, retorno nulo o
-excepción inesperada. `Matriz3DTest` verifica las dos representaciones 3D, sus
-operaciones y sus contratos de inmutabilidad y dimensiones. El principal
+excepción inesperada. `Matriz3DTest` y `Matriz3DOperacionesTest` verifican las
+dos representaciones 3D, sus operaciones y sus contratos de inmutabilidad y dimensiones. El principal
 imprime entradas, resultados, `CORRECTO` y un resumen de cobertura.
 
 ## Dependencias
@@ -108,25 +108,49 @@ array.Matriz3D reordenada = volumen.permutarEjes(1, 0, 2);
 La API 3D incluye:
 
 - Construcción desde `double`, `Double`, `BigDecimal`, `String` y
-  `BigComplex`, configuración de precisión, ceros, relleno, identidades por
-  capas, aleatorias y apilado de matrices 2D.
-- Acceso inmutable, sustitución y extracción de capas, cortes sobre cualquiera
-  de los tres ejes, submatrices 3D, inserción, eliminación, redimensión y
-  concatenación por capas, filas o columnas.
-- Suma, resta, conjugación, escalares, Hadamard, cociente y producto matricial
-  independiente por capas.
-- Transpuesta y adjunta hermítica por capas, permutación de ejes, `flatten`,
-  `reshape`, suma y promedio globales o por capas, producto interno y normas de
-  Frobenius y máximo.
+  `BigComplex`, serialización, secuencias, ceros, unos, diagonales, identidades
+  tensoriales o por capas, aleatorias reales/complejas/dispersas y apilado 2D.
+- Acceso inmutable a elementos, fibras y planos sobre cualquier eje;
+  submatrices, selección, inserción, eliminación, partición, concatenación,
+  redimensión, repetición, broadcasting y padding constante.
+- `map`, `zip`, broadcasting aritmético, suma, resta, conjugación, partes
+  real/imaginaria, módulo, potencias elemento a elemento, escalares, Hadamard y
+  cociente.
+- Permutación, intercambio y movimiento de ejes, volteo, desplazamiento
+  circular, giros de 90°, `flatten`, `reshape` y transposición por capas.
+- Reducciones globales o por eje: suma, producto, promedio, varianza,
+  desviación, conteo no nulo y extremos por módulo; producto interno y normas
+  de Frobenius y máximo.
+- Álgebra multilineal: matricización `desplegar`, producto modo-n por matriz o
+  vector, producto multilineal, traza, diagonal, forma multilineal, rango
+  multilineal, doble contracción, producto exterior, vectorial y Kronecker.
+- HOSVD completa y Tucker truncada, con núcleo, factores y error de
+  reconstrucción verificable.
+- Convolución y correlación 3D directa en modos `COMPLETA`, `MISMA` y `VALIDA`.
+- Álgebra t-product sobre tubos en el eje de capas: producto, identidad,
+  adjunta, inversa, potencia, DFT/inversa DFT por capas y t-SVD.
+- Predicados y proyecciones diagonal, cúbica, simétrica y antisimétrica.
 - Conversión sin aliasing entre las representaciones array/lista y comparación
   exacta o aproximada.
 - Adaptadores `aplicarPorCapas` y `combinarPorCapas` para reutilizar sobre
   todas las capas cualquier algoritmo 2D cuyo resultado sea otra matriz.
 
-Las operaciones algebraicas estrictamente bidimensionales —determinantes,
-inversas, factorizaciones, espectro, sistemas, estadística o grafos— se aplican
-a un corte devuelto por `capa`, `cortePorFila` o `cortePorColumna`. No se asigna
-un determinante o una inversa ficticios a un tensor de orden tres.
+El inventario sigue las operaciones de arrays multidimensionales de
+[NumPy](https://numpy.org/doc/2.0/reference/routines.array-manipulation.html),
+la definición de matricización y producto modo-n de
+[Kolda y Bader](https://www.kolda.net/publication/koba09/), la convolución
+N-dimensional de [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.convolve.html)
+y el álgebra t-product de
+[Kilmer y Martin](https://doi.org/10.1016/j.laa.2010.09.020).
+
+Las operaciones estrictamente bidimensionales —determinante, espectro,
+sistemas o factorizaciones clásicas— se aplican a un plano o en lote mediante
+`aplicarPorCapas`/`combinarPorCapas`. Un tensor general no posee un determinante
+ni una inversa canónicos; `inversaT` está definida explícitamente respecto del
+t-product. El rango CP exacto y su mejor aproximación son problemas distintos y
+potencialmente mal planteados, por lo que la biblioteca expone el rango
+multilineal y las descomposiciones HOSVD/Tucker y t-SVD, pero no inventa un
+resultado CP exacto.
 
 ## Catálogo de API
 

@@ -134,6 +134,10 @@ public final class Matriz3D extends AbstractMatriz3D<Matriz3D, Matriz> {
 
     public static Matriz3D cero(int capas, int filas, int columnas) { return new Matriz3D(capas, filas, columnas); }
 
+    public static Matriz3D unos(int capas, int filas, int columnas) {
+        return new Matriz3D(capas, filas, columnas, BigComplex.ONE);
+    }
+
     public static Matriz3D rellena(int capas, int filas, int columnas, BigComplex valor) {
         return new Matriz3D(capas, filas, columnas, valor);
     }
@@ -142,6 +146,44 @@ public final class Matriz3D extends AbstractMatriz3D<Matriz3D, Matriz> {
         BigComplex[][][] datos = nuevosDatos(capas, filas, columnas, BigComplex.ZERO);
         for (int k = 0; k < capas; k++)
             for (int i = 0; i < Math.min(filas, columnas); i++) datos[k][i][i] = BigComplex.ONE;
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D identidad(int orden) {
+        if (orden <= 0) throw new DimensionMatrizException("El orden debe ser positivo");
+        BigComplex[][][] datos = nuevosDatos(orden, orden, orden, BigComplex.ZERO);
+        for (int n = 0; n < orden; n++) datos[n][n][n] = BigComplex.ONE;
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D identidadT(int capas, int orden) {
+        BigComplex[][][] datos = nuevosDatos(capas, orden, orden, BigComplex.ZERO);
+        for (int i = 0; i < orden; i++) datos[0][i][i] = BigComplex.ONE;
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D diagonal(BigComplex... diagonal) {
+        Objects.requireNonNull(diagonal, "La diagonal no puede ser null");
+        if (diagonal.length == 0) throw new DimensionMatrizException("Diagonal vacía");
+        BigComplex[][][] datos = nuevosDatos(diagonal.length, diagonal.length, diagonal.length, BigComplex.ZERO);
+        for (int n = 0; n < diagonal.length; n++) datos[n][n][n] = Objects.requireNonNull(diagonal[n]);
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D desdeVector(BigComplex[] valores, int capas, int filas, int columnas) {
+        return new Matriz3D(datosDesdeVector(valores, capas, filas, columnas));
+    }
+
+    public static Matriz3D deserializar(String texto) { return new Matriz3D(parsearSerializado(texto)); }
+
+    public static Matriz3D secuencial(int capas, int filas, int columnas, BigComplex inicio, BigComplex incremento) {
+        Objects.requireNonNull(inicio); Objects.requireNonNull(incremento);
+        BigComplex[][][] datos = nuevosDatos(capas, filas, columnas, BigComplex.ZERO);
+        BigComplex actual = inicio;
+        for (int k = 0; k < capas; k++) for (int i = 0; i < filas; i++) for (int j = 0; j < columnas; j++) {
+            datos[k][i][j] = actual;
+            actual = actual.add(incremento, Complejos.CONTEXTO_DEFECTO);
+        }
         return new Matriz3D(datos);
     }
 
@@ -169,6 +211,26 @@ public final class Matriz3D extends AbstractMatriz3D<Matriz3D, Matriz> {
         BigComplex[][][] datos = nuevosDatos(capas, filas, columnas, BigComplex.ZERO);
         for (int k = 0; k < capas; k++) for (int i = 0; i < filas; i++) for (int j = 0; j < columnas; j++)
             datos[k][i][j] = Complejos.de(random.nextDouble() * 2 - 1);
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D aleatoriaCompleja(int capas, int filas, int columnas, long semilla) {
+        Random random = new Random(semilla);
+        BigComplex[][][] datos = nuevosDatos(capas, filas, columnas, BigComplex.ZERO);
+        for (int k = 0; k < capas; k++) for (int i = 0; i < filas; i++) for (int j = 0; j < columnas; j++)
+            datos[k][i][j] = BigComplex.valueOf(BigDecimal.valueOf(random.nextDouble() * 2 - 1),
+                    BigDecimal.valueOf(random.nextDouble() * 2 - 1));
+        return new Matriz3D(datos);
+    }
+
+    public static Matriz3D aleatoriaDispersa(int capas, int filas, int columnas, BigDecimal densidad, long semilla) {
+        Objects.requireNonNull(densidad, "La densidad no puede ser null");
+        if (densidad.signum() < 0 || densidad.compareTo(BigDecimal.ONE) > 0)
+            throw new IllegalArgumentException("La densidad debe estar entre cero y uno");
+        Random random = new Random(semilla);
+        BigComplex[][][] datos = nuevosDatos(capas, filas, columnas, BigComplex.ZERO);
+        for (int k = 0; k < capas; k++) for (int i = 0; i < filas; i++) for (int j = 0; j < columnas; j++)
+            if (random.nextDouble() < densidad.doubleValue()) datos[k][i][j] = Complejos.de(random.nextDouble() * 2 - 1);
         return new Matriz3D(datos);
     }
 
