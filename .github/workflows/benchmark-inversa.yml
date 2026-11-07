@@ -1,0 +1,48 @@
+name: Benchmark inversion (1000x1000)
+on:
+  push:
+    branches:
+      - benchmark/inversa-1000-20261107
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  invert:
+    name: "Inversion ${{ matrix.implementation }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        implementation: [array, lista]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build library and dependencies
+        run: mvn -B -q -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/dependency
+      - name: Time inversions with a process time limit
+        env:
+          IMPL: ${{ matrix.implementation }}
+        shell: bash
+        run: |
+          set +e
+          echo "RUNNER_CPU: $(lscpu | grep -E 'Model name:|CPU\(s\):' | head -2)"
+          for n in 64 128 256 1000; do
+            limit=90
+            if [ "$n" = 1000 ]; then limit=180; fi
+            echo "ATTEMPT impl=$IMPL n=$n limit_seconds=$limit"
+            timeout -s TERM -k 5s "$limit"s java -Xmx5g \
+              -cp "target/classes:target/dependency/*" BenchmarkInversa1000 "$IMPL" "$n"
+            status=$?
+            echo "ATTEMPT_END impl=$IMPL n=$n exit=$status (124=timeout, 137=OOM/kill)"
+            if [ "$status" != 0 ]; then
+              echo "Stopping larger sizes for this representation."
+              break
+            fi
+          done
